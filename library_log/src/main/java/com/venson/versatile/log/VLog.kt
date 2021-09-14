@@ -1,5 +1,7 @@
 package com.venson.versatile.log
 
+import android.content.Context
+
 /**
  * 日志工具类
  */
@@ -21,6 +23,15 @@ object VLog {
 
     //是否保存日志
     private var isSaveLog: Boolean = true
+
+    //应用实例
+    private var applicationContext: Context? = null
+
+    /*
+    是否开启自动初始化
+    自动初始化则provide自动注册application
+     */
+    private var isAutoMaticInitial: Boolean = true
 
     /**
      * 设置是否开启打印日志
@@ -88,6 +99,38 @@ object VLog {
     @JvmStatic
     fun saveLogEnable(): Boolean {
         return isSaveLog
+    }
+
+    /**
+     * 默认开启自动初始化
+     * 若要关闭自动逻辑，请在宿主APP的application中attachContext方法中调用该方法关闭
+     */
+    fun automaticEnable(enable: Boolean): VLog {
+        isAutoMaticInitial = enable
+        return this
+    }
+
+    /**
+     * 是否开启自动注册
+     */
+    fun automaticEnable(): Boolean {
+        return isAutoMaticInitial
+    }
+
+    /**
+     * 初始化application
+     * 手动初始化，需要现在application关闭自动初始化
+     */
+    fun init(context: Context): VLog {
+        applicationContext = context.applicationContext
+        return this
+    }
+
+    /**
+     * 获取applicationContext
+     */
+    fun applicationContext(): Context? {
+        return applicationContext
     }
 
     @JvmStatic

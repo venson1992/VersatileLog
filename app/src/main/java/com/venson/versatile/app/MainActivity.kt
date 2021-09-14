@@ -12,6 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.venson.versatile.app.databinding.ActivityMainBinding
+import com.venson.versatile.log.LogEncryptJNI
 import com.venson.versatile.log.logW
 
 class MainActivity : AppCompatActivity() {
@@ -28,7 +29,8 @@ class MainActivity : AppCompatActivity() {
         binding.appBarMain.fab?.setOnClickListener { view ->
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action") {
-                    it.logW()
+                    val data = LogEncryptJNI.readEncrypt(packageName)
+                    data.logW()
                 }
                 .show()
         }

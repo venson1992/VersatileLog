@@ -3,6 +3,12 @@
     package="com.venson.versatile.log">
 
     <application>
+        <!-- 自动初始化 -->
+        <provider
+            android:name=".InitialProvider"
+            android:authorities="com.venson.versatile.log.InitialProvider"
+            android:exported="false" />
+        <!-- 提供接入应用信息 -->
         <activity
             android:name=".ProviderActivity"
             android:exported="true">
