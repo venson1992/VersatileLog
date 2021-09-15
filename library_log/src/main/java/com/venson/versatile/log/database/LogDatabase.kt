@@ -1,13 +1,19 @@
 package com.venson.versatile.log.database
 
 import android.content.Context
+import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.tencent.wcdb.database.SQLiteCipherSpec
 import com.tencent.wcdb.room.db.WCDBOpenHelperFactory
 import com.venson.versatile.log.LogEncryptJNI
+import com.venson.versatile.log.VLog
 import com.venson.versatile.log.database.dao.LogDao
 
+@Database(
+    entities = [LogEntity::class],
+    version = 1
+)
 abstract class LogDatabase : RoomDatabase() {
 
     abstract fun logDao(): LogDao
@@ -25,7 +31,9 @@ abstract class LogDatabase : RoomDatabase() {
                 val cipherSpec: SQLiteCipherSpec = SQLiteCipherSpec()
                     .setPageSize(4096)
                     .setKDFIteration(64000)
-                val password = LogEncryptJNI.readEncrypt(applicationContext.packageName)
+                val password = LogEncryptJNI.readEncrypt(
+                    VLog.encryptedKey() ?: applicationContext.packageName
+                )
                 val factory = WCDBOpenHelperFactory()
                     .passphrase(password.toByteArray())// 指定加密DB密钥，非加密DB去掉此行
                     .cipherSpec(cipherSpec)// 指定加密方式，使用默认加密可以省略

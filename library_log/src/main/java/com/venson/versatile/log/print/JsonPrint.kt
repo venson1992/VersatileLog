@@ -1,5 +1,7 @@
 package com.venson.versatile.log.print
 
+import com.venson.versatile.log.VLog
+import com.venson.versatile.log.database.LogDatabase
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -33,5 +35,10 @@ internal object JsonPrint : BasePrint() {
             printSub(type, tag, "║ $it")
         }
         printLine(tag, false)
+        if (VLog.saveLogEnable()) {
+            VLog.applicationContext()?.let {
+                LogDatabase.getInstance(it).logDao().insertLog(tag, type, message)
+            }
+        }
     }
 }

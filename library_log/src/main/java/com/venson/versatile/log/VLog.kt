@@ -27,6 +27,9 @@ object VLog {
     //应用实例
     private var applicationContext: Context? = null
 
+    //数据库加密关键字
+    private var encryptKey: String? = null
+
     /*
     是否开启自动初始化
     自动初始化则provide自动注册application
@@ -131,6 +134,21 @@ object VLog {
      */
     fun applicationContext(): Context? {
         return applicationContext
+    }
+
+    /**
+     * 设置数据库加密密钥
+     */
+    fun encryptedKey(key: String): VLog {
+        encryptKey = key
+        return this
+    }
+
+    /**
+     * 数据库加密密钥
+     */
+    fun encryptedKey(): String? {
+        return encryptKey
     }
 
     @JvmStatic

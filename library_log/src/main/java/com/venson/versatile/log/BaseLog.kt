@@ -72,11 +72,11 @@ internal object BaseLog {
                 msg.toString()
             }
         }
+        val headContent = headString ?: ""
+        val msgContent = content ?: ""
         /*
         打印日志
          */
-        val headContent = headString ?: ""
-        val msgContent = content ?: ""
         if (VLog.printLogEnable()) {
             when {
                 type == JSON || isObject -> {

@@ -1,5 +1,8 @@
 package com.venson.versatile.log.print
 
+import com.venson.versatile.log.VLog
+import com.venson.versatile.log.database.LogDatabase
+
 /**
  * 基础输出
  */
@@ -19,6 +22,11 @@ internal object DefaultPrint : BasePrint() {
             printSub(type, tag, message.substring(index, length))
         } else {
             printSub(type, tag, message)
+        }
+        if (VLog.saveLogEnable()) {
+            VLog.applicationContext()?.let {
+                LogDatabase.getInstance(it).logDao().insertLog(tag, type, message)
+            }
         }
     }
 
