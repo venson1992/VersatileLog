@@ -1,6 +1,9 @@
 #指定需要CMAKE的最小版本
 cmake_minimum_required(VERSION 3.4.1)
 
+#当前cmakelists.txt所在目录的所有.c .cpp源文件
+AUX_SOURCE_DIRECTORY(. SRC_LIST)
+
 ##C 的编译选项是 CMAKE_C_FLAGS
 ## 指定编译参数，可选
 SET(CMAKE_CXX_FLAGS "-std=c++11 -fexceptions -frtti -fpermissive -Wno-error=format-security -Wno-error=pointer-sign")
@@ -9,10 +12,14 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -s")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -s")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -s")
 
+#设置生成的so动态库最后输出的路径
+set(jnilibs "${PROJECT_SOURCE_DIR}/libs")
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${jnilibs}/${ANDROID_ABI})
+
 add_library( # Specifies the name of the library.
         log-encrypt-lib
 
-        # Sets the library as a shared library.
+        # Sets the library as a shared library.  STATIC  SHARED
         SHARED
 
         # Provides a relative path to your source file(s).

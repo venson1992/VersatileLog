@@ -32,6 +32,13 @@ android {
     buildFeatures {
         viewBinding true
     }
+    android {
+        sourceSets {
+            main {
+                jniLibs.srcDirs = ['libs']
+            }
+        }
+    }
 }
 
 dependencies {
