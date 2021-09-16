@@ -1,0 +1,33 @@
+plugins {
+    id 'java-library'
+    id 'kotlin'
+    id 'com.android.lint'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+lintOptions {
+    htmlReport true
+    htmlOutput file("lint-report.html")
+    textReport true
+    absolutePaths false
+    ignoreTestSources true
+}
+
+dependencies {
+    //导入两个Lint官方库，导入方式为 compileOnly，因为Lint检查只在编译时有效
+    //https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-master-dev:lint/libs/lint-checks/src/main/java/com/android/tools/lint/checks/
+    //https://mvnrepository.com/artifact/com.android.tools.lint
+    // For a description of the below dependencies, see the main project README
+    compileOnly "com.android.tools.lint:lint-api:$lintVersion"
+    // You typically don't need this one:
+    compileOnly "com.android.tools.lint:lint-checks:$lintVersion"
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "com.android.tools.lint:lint:$lintVersion"
+    testImplementation "com.android.tools.lint:lint-tests:$lintVersion"
+}

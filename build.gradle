@@ -1,4 +1,10 @@
 buildscript {
+    ext {
+        kotlinVersion = '1.5.30'
+        // Current lint target: 7.0.2+23
+        gradlePluginVersion = '7.0.2'
+        lintVersion = '30.0.2'
+    }
     repositories {
         maven { url 'https://maven.aliyun.com/repository/google' }
         maven { url 'https://maven.aliyun.com/repository/public' }
@@ -7,8 +13,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:7.0.2"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.5.30"
+        classpath "com.android.tools.build:gradle:$gradlePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
     }
 }
 

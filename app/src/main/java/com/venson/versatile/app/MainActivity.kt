@@ -14,9 +14,7 @@ import com.google.android.material.navigation.NavigationView
 import com.google.android.material.snackbar.Snackbar
 import com.venson.versatile.app.databinding.ActivityMainBinding
 import com.venson.versatile.log.LogEncryptJNI
-import com.venson.versatile.log.database.LogDatabase
 import com.venson.versatile.log.logW
-import com.venson.versatile.log.work.DefaultExecutorSupplier
 
 class MainActivity : AppCompatActivity() {
 
@@ -34,11 +32,6 @@ class MainActivity : AppCompatActivity() {
                 .setAction("Action") {
                     val data = LogEncryptJNI.readEncrypt(packageName)
                     data.logW()
-                    DefaultExecutorSupplier.instance.forBackgroundTasks().execute {
-                        LogDatabase.getInstance(applicationContext).logDao().allList().forEach {
-                            Log.d("db", it.toString())
-                        }
-                    }
                 }
                 .show()
         }
