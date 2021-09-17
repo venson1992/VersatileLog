@@ -39,7 +39,17 @@ abstract class LogDatabase : RoomDatabase() {
                     .cipherSpec(cipherSpec)// 指定加密方式，使用默认加密可以省略
                     .writeAheadLoggingEnabled(true)// 打开WAL以及读写并发，可以省略让Room决定是否要打开
                     .asyncCheckpointEnabled(true)// 打开异步Checkpoint优化，不需要可以省略
-                Room.databaseBuilder(applicationContext, LogDatabase::class.java, DATABASE_NAME)
+                val path: String = (applicationContext.externalCacheDir?.path
+                    ?: applicationContext.cacheDir.path).let {
+                    applicationContext.packageName.let { packageName ->
+                        it.substring(0, it.indexOf(packageName) + packageName.length)
+                    }
+                }
+                Room.databaseBuilder(
+                    applicationContext,
+                    LogDatabase::class.java,
+                    "$path/database/$DATABASE_NAME"
+                )
                     .openHelperFactory(factory)
                     .build()
                     .also {
