@@ -2,6 +2,7 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android'
     id 'kotlin-kapt'
+    id 'maven-publish'
 }
 
 group = GROUP
@@ -52,21 +53,19 @@ android {
             version '3.10.2'
         }
     }
-    android {
-        sourceSets {
-            main {
-                jniLibs.srcDirs = ['libs']
-            }
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
         }
-        packagingOptions {
-            pickFirst 'lib/*/*'
-        }
+    }
+    packagingOptions {
+        pickFirst 'lib/*/*'
     }
 }
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    setArchiveClassifier('sources')
 }
 
 artifacts {
@@ -74,6 +73,7 @@ artifacts {
 }
 
 dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     //gson
     implementation 'com.google.code.gson:gson:2.8.8'
     //room

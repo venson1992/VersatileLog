@@ -18,6 +18,7 @@ lintOptions {
 }
 
 dependencies {
+    compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
     //导入两个Lint官方库，导入方式为 compileOnly，因为Lint检查只在编译时有效
     //https://cs.android.com/android-studio/platform/tools/base/+/mirror-goog-studio-master-dev:lint/libs/lint-checks/src/main/java/com/android/tools/lint/checks/
     //https://mvnrepository.com/artifact/com.android.tools.lint
