@@ -11,10 +11,12 @@ buildscript {
         maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
         google()
         mavenCentral()
+        maven { url 'https://jitpack.io' }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$gradlePluginVersion"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
     }
 }
 

@@ -3,19 +3,20 @@ plugins {
     id 'kotlin-android'
 }
 
+group = GROUP
+version = BUILD_VERSION
+
 android {
-    compileSdk 31
-
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_TOOLS_VERSION
     defaultConfig {
-        minSdk 16
-        targetSdk 31
-        versionCode 1
-        versionName "1.0"
-
+        minSdkVersion MIN_SDK_VERSION as int
+        targetSdkVersion TARGET_SDK_VERSION as int
+        versionCode BUILD_VERSION_INT as int
+        versionName BUILD_VERSION
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -34,11 +35,19 @@ android {
     }
 }
 
+task sourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
+}
+
+artifacts {
+    archives sourcesJar
+}
+
 /** Package the given lint checks library into this AAR  */
 dependencies {
     //依赖定义好的Lint规则库
     //Lint规则库会产生一个 lint.jar包
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlinVersion"
     implementation project(':checks')
     lintPublish project(':checks')
 }
