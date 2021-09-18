@@ -16,12 +16,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         ndk {
-            abiFilters "armeabi", "armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
+            abiFilters /*"armeabi", */"armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
         }
         externalNativeBuild {
             cmake {
                 cppFlags "-fexceptions -frtti -std=c++11 -fpermissive"
-                abiFilters "armeabi", "armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
+                abiFilters /*"armeabi", */"armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
             }
         }
         javaCompileOptions {
@@ -43,7 +43,8 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
     }
-    ndkVersion '16.1.4479499'
+    //jitpack限制了版本号
+    ndkVersion '21.1.6352462'
     externalNativeBuild {
         cmake {
             path file('CMakeLists.txt')

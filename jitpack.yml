@@ -1,7 +1,7 @@
 jdk:
   - openjdk11
-before_install:
-  - yes | sdkmanager --uninstall "ndk-bundle" | sdkmanager --install "ndk;16.1.4479499"
+  #before_install:
+  #  - yes | sdkmanager --uninstall "ndk-bundle" | sdkmanager --install "ndk;16.1.4479499"
 
   #install:
   #  - ./gradlew :library_log:build :library_log:publishToMavenLocal -x :library_log:test
