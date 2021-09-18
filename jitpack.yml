@@ -1,8 +1,8 @@
 jdk:
   - openjdk11
-install:
-  - ./gradlew :library_log:build :library_log:publishToMavenLocal -x :library_log:test
-  - ./gradlew :library_lint:build :library_lint:publishToMavenLocal -x :library_lint:test
+  #install:
+  #  - ./gradlew :library_log:build :library_log:publishToMavenLocal -x :library_log:test
+  #  - ./gradlew :library_lint:build :library_lint:publishToMavenLocal -x :library_lint:test
 
   #  - find . -name "*.aar"
   #  - ./gradlew :moka:build :moka:publishToMavenLocal -x :moka:test
