@@ -5,9 +5,6 @@ plugins {
     id 'maven-publish'
 }
 
-group = GROUP
-version = BUILD_VERSION
-
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
     buildToolsVersion BUILD_TOOLS_VERSION
@@ -44,7 +41,7 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
     kotlinOptions {
-        jvmTarget = '11'
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
     ndkVersion '16.1.4479499'
     externalNativeBuild {
@@ -75,8 +72,15 @@ artifacts {
 project.afterEvaluate {
     publishing {
         publications {
+            // Creates a Maven publication called "release".
             release(MavenPublication) {
+                // Applies the component for the release build variant.
                 from components.release
+
+                // You can then customize attributes of the publication as shown below.
+                groupId = GROUP
+                artifactId = "log"
+                version = BUILD_VERSION
             }
         }
     }
