@@ -1,7 +1,7 @@
 jdk:
   - openjdk11
 before_install:
-  - yes | sdkmanager --install "ndk;16.1.4479499" "build-tools;30.0.3" "platforms;android-30"
+  - yes | sdkmanager --uninstall "ndk-bundle" | sdkmanager --install "ndk;16.1.4479499"
 
   #install:
   #  - ./gradlew :library_log:build :library_log:publishToMavenLocal -x :library_log:test
