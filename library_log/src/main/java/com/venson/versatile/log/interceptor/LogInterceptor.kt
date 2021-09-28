@@ -35,6 +35,12 @@ class LogInterceptor(
     annotation class Level
 
     override fun intercept(chain: Interceptor.Chain): Response? {
+        /*
+        未开启打印和本地化
+         */
+        if (!VLog.printLogEnable() && !VLog.saveLogEnable()) {
+            return chain.proceed(chain.request())
+        }
         val startTime = SystemClock.elapsedRealtime()
         val request = try {
             chain.request()
