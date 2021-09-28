@@ -17,5 +17,7 @@ data class LogEntity(
 
     var type: String?,
 
+    var head: String?,
+
     var msg: String?
 )

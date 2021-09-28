@@ -1,32 +1,13 @@
 package com.venson.versatile.log
 
-import com.google.gson.Gson
+import android.util.Log
+import com.google.gson.GsonBuilder
 import com.venson.versatile.log.print.BasePrint
 import com.venson.versatile.log.print.DefaultPrint
 import com.venson.versatile.log.print.JsonPrint
 import com.venson.versatile.log.print.XmlPrint
-import java.io.PrintWriter
-import java.io.StringWriter
 
 internal object BaseLog {
-
-    /*
-    日志类型
-     */
-    const val V = 0x1
-    const val D = 0x2
-    const val I = 0x3
-    const val W = 0x4
-    const val E = 0x5
-    const val A = 0x6
-    const val JSON = 0x7
-    const val XML = 0x8
-
-    /*
-    类型
-     */
-    private const val EXTENSION_JAVA = ".java"
-    private const val EXTENSION_KT = ".kt"
 
     /*
     stackTraceIndex默认取值6
@@ -40,7 +21,7 @@ internal object BaseLog {
     private const val stackTraceIndex = 6
 
     private val gson by lazy {
-        Gson()
+        GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()
     }
 
     /**
@@ -62,11 +43,18 @@ internal object BaseLog {
         } else if (msg is String) {
             msg
         } else if (msg is Throwable) {
-            getThrowableStackTrace(msg)
+            Log.getStackTraceString(msg)
         } else {
             try {
-                isObject = true
-                gson.toJson(msg)
+                gson.toJson(msg).let {
+                    if (it.isNullOrEmpty() || it == "{}") {
+                        isObject = false
+                        msg.toString()
+                    } else {
+                        isObject = true
+                        it
+                    }
+                }
             } catch (e: Exception) {
                 isObject = false
                 msg.toString()
@@ -77,12 +65,12 @@ internal object BaseLog {
         /*
         打印日志
          */
-        if (VLog.printLogEnable()) {
+        if (VLog.printLogEnable() || VLog.saveLogEnable()) {
             when {
-                type == JSON || isObject -> {
+                type == VLog.JSON || isObject -> {
                     JsonPrint.print(type, tag, headContent, msgContent)
                 }
-                type == XML -> {
+                type == VLog.XML -> {
                     XmlPrint.print(type, tag, headContent, msgContent)
                 }
                 else -> {
@@ -107,8 +95,14 @@ internal object BaseLog {
         var className: String? = null
         var headString: String? = null
         targetTraceElement?.let {
-            className = it[0].toString()
-            headString = "[ ($className:${it[1]})#${it[2]} ] "
+            className = it[0].toString().let { fileName ->
+                if (fileName.indexOf(".") > 0) {
+                    fileName.substring(0, fileName.indexOf("."))
+                } else {
+                    fileName
+                }
+            }
+            headString = it[1].toString()
         }
         var tag = tagStr ?: className
         if (VLog.globalTag().trim().isEmpty() && tag.isNullOrEmpty()) {
@@ -126,47 +120,13 @@ internal object BaseLog {
     }
 
     /**
-     * 获取报错信息
-     */
-    private fun getThrowableStackTrace(tr: Throwable): String {
-        val sw = StringWriter()
-        val pw = PrintWriter(sw)
-        tr.printStackTrace(pw)
-        pw.flush()
-        val message = sw.toString()
-        val traceString = message.split("\\n\\t").toTypedArray()
-        val sb = StringBuilder()
-        sb.append("\n")
-        for (trace in traceString) {
-            sb.append(trace).append("\n")
-        }
-        return sb.toString()
-    }
-
-    /**
      * 获取跳转信息
      */
     private fun getTraceInfo(): Array<Any> {
         val stackTrace = Thread.currentThread().stackTrace
         val stackTraceElement = stackTrace[stackTraceIndex]
-        var className = stackTraceElement.className
-        val lastFileType = if (stackTraceElement.fileName.endsWith(EXTENSION_KT, true)) {
-            EXTENSION_KT
-        } else {
-            EXTENSION_JAVA
-        }
-        val classNameInfo = className.split(".").toTypedArray()
-        if (classNameInfo.isNotEmpty()) {
-            className = classNameInfo[classNameInfo.size - 1] + lastFileType
-        }
-        if (className.contains("$")) {
-            className = className.split("$").toTypedArray()[0] + lastFileType
-        }
-        val methodName = stackTraceElement.methodName
-        var lineNumber = stackTraceElement.lineNumber
-        if (lineNumber < 0) {
-            lineNumber = 0
-        }
-        return arrayOf(className, lineNumber, methodName)
+        val filename = stackTraceElement.fileName
+        val atInfo = stackTraceElement.toString()
+        return arrayOf(filename, atInfo)
     }
 }

@@ -1,6 +1,7 @@
 package com.venson.versatile.log
 
 import android.content.Context
+import androidx.annotation.IntRange
 
 /**
  * 日志工具类
@@ -8,6 +9,18 @@ import android.content.Context
 object VLog {
 
     const val TAG_DEFAULT = "VLog"
+
+    /*
+    日志类型
+     */
+    const val V = 0x1
+    const val D = 0x2
+    const val I = 0x3
+    const val W = 0x4
+    const val E = 0x5
+    const val A = 0x6
+    const val JSON = 0x7
+    const val XML = 0x8
 
     //providerAction
     const val ACTION_PROVIDER = "com.venson.versatile.log.PROVIDER"
@@ -35,6 +48,9 @@ object VLog {
     自动初始化则provide自动注册application
      */
     private var isAutoMaticInitial: Boolean = true
+
+    //日志保存期限，默认7天
+    private var storageLifeInDay: Int = 7
 
     /**
      * 设置是否开启打印日志
@@ -151,113 +167,129 @@ object VLog {
         return encryptKey
     }
 
+    /**
+     * 设置日志本地化存储有效期
+     * @param day 有效范围1-365天
+     */
+    fun logStorageLifeInDay(@IntRange(from = 1L, to = 365L) day: Int): VLog {
+        storageLifeInDay = day
+        return this
+    }
+
+    /**
+     * 获取本地化存储时效
+     */
+    fun logStorageLifeInDay(): Int {
+        return storageLifeInDay
+    }
+
     @JvmStatic
     fun v() {
-        BaseLog.printLog(BaseLog.V, null, null)
+        BaseLog.printLog(V, null, null)
     }
 
     @JvmStatic
     fun v(msg: Any?) {
-        BaseLog.printLog(BaseLog.V, msg, null)
+        BaseLog.printLog(V, msg, null)
     }
 
     @JvmStatic
     fun v(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.V, msg, tag)
+        BaseLog.printLog(V, msg, tag)
     }
 
     @JvmStatic
     fun d() {
-        BaseLog.printLog(BaseLog.D, null, null)
+        BaseLog.printLog(D, null, null)
     }
 
     @JvmStatic
     fun d(msg: Any?) {
-        BaseLog.printLog(BaseLog.D, msg, null)
+        BaseLog.printLog(D, msg, null)
     }
 
     @JvmStatic
     fun d(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.D, msg, tag)
+        BaseLog.printLog(D, msg, tag)
     }
 
     @JvmStatic
     fun i() {
-        BaseLog.printLog(BaseLog.I, null, null)
+        BaseLog.printLog(I, null, null)
     }
 
     @JvmStatic
     fun i(msg: Any?) {
-        BaseLog.printLog(BaseLog.I, msg, null)
+        BaseLog.printLog(I, msg, null)
     }
 
     @JvmStatic
     fun i(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.I, msg, tag)
+        BaseLog.printLog(I, msg, tag)
     }
 
     @JvmStatic
     fun w() {
-        BaseLog.printLog(BaseLog.W, null, null)
+        BaseLog.printLog(W, null, null)
     }
 
     @JvmStatic
     fun w(msg: Any?) {
-        BaseLog.printLog(BaseLog.W, msg, null)
+        BaseLog.printLog(W, msg, null)
     }
 
     @JvmStatic
     fun w(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.W, msg, tag)
+        BaseLog.printLog(W, msg, tag)
     }
 
     @JvmStatic
     fun e() {
-        BaseLog.printLog(BaseLog.E, null, null)
+        BaseLog.printLog(E, null, null)
     }
 
     @JvmStatic
     fun e(msg: Any?) {
-        BaseLog.printLog(BaseLog.E, msg, null)
+        BaseLog.printLog(E, msg, null)
     }
 
     @JvmStatic
     fun e(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.E, msg, tag)
+        BaseLog.printLog(E, msg, tag)
     }
 
     @JvmStatic
     fun a() {
-        BaseLog.printLog(BaseLog.A, null, null)
+        BaseLog.printLog(A, null, null)
     }
 
     @JvmStatic
     fun a(msg: Any?) {
-        BaseLog.printLog(BaseLog.A, msg, null)
+        BaseLog.printLog(A, msg, null)
     }
 
     @JvmStatic
     fun a(tag: String?, msg: Any?) {
-        BaseLog.printLog(BaseLog.A, msg, tag)
+        BaseLog.printLog(A, msg, tag)
     }
 
     @JvmStatic
     fun json(jsonFormat: String?) {
-        BaseLog.printLog(BaseLog.JSON, jsonFormat, null)
+        BaseLog.printLog(JSON, jsonFormat, null)
     }
 
     @JvmStatic
     fun json(tag: String?, jsonFormat: String?) {
-        BaseLog.printLog(BaseLog.JSON, jsonFormat, tag)
+        BaseLog.printLog(JSON, jsonFormat, tag)
     }
 
     @JvmStatic
     fun xml(xml: String?) {
-        BaseLog.printLog(BaseLog.XML, xml, null)
+        BaseLog.printLog(XML, xml, null)
     }
 
     @JvmStatic
     fun xml(tag: String?, xml: String?) {
-        BaseLog.printLog(BaseLog.XML, xml, tag)
+        BaseLog.printLog(XML, xml, tag)
     }
 }

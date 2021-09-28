@@ -1,7 +1,5 @@
 package com.venson.versatile.log.print
 
-import com.venson.versatile.log.VLog
-import com.venson.versatile.log.database.LogDatabase
 import java.io.StringReader
 import java.io.StringWriter
 import javax.xml.transform.OutputKeys
@@ -13,24 +11,12 @@ import javax.xml.transform.stream.StreamSource
 
 internal object XmlPrint : BasePrint() {
 
-    override fun print(type: Int, tag: String?, header: String, msg: String) {
-        val message: String = formatXML(msg).let {
+    override fun parseContent(msg: String): String {
+        return formatXML(msg).let {
             if (it.isNullOrEmpty()) {
-                header + NULL_TIPS
+                NULL_TIPS
             } else {
-                header + it
-            }
-        }
-        printLine(tag, true)
-        message.split(LINE_SEPARATOR).forEach {
-            if (it.trim().isNotEmpty()) {
-                printSub(type, tag, "║ $it")
-            }
-        }
-        printLine(tag, false)
-        if (VLog.saveLogEnable()) {
-            VLog.applicationContext()?.let {
-                LogDatabase.getInstance(it).logDao().insertLog(tag, type, message)
+                it
             }
         }
     }
@@ -42,7 +28,9 @@ internal object XmlPrint : BasePrint() {
             val xmlOutput = StreamResult(StringWriter())
             val transformer: Transformer = TransformerFactory.newInstance().newTransformer()
             transformer.setOutputProperty(OutputKeys.INDENT, "yes")
-            transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+            transformer.setOutputProperty(
+                "{http://xml.apache.org/xslt}indent-amount", "2"
+            )
             transformer.transform(xmlInput, xmlOutput)
             xmlOutput.writer.toString().replaceFirst(">", ">\n")
         } catch (e: Exception) {

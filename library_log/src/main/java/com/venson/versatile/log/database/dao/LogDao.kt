@@ -4,14 +4,18 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.venson.versatile.log.BaseLog
+import com.venson.versatile.log.VLog
 import com.venson.versatile.log.database.LogEntity
 import com.venson.versatile.log.work.DefaultExecutorSupplier
+import java.util.*
 
 @Dao
 abstract class LogDao {
 
-    fun insertLog(tag: String?, level: Int, msg: String?) {
+    /**
+     * 插入日志
+     */
+    fun insertLog(tag: String?, level: Int, head: String?, msg: String?) {
         DefaultExecutorSupplier.instance.forBackgroundTasks().execute {
             innerInsertLog(
                 LogEntity(
@@ -20,16 +24,17 @@ abstract class LogDao {
                     tag,
                     level.toString(),
                     when (level) {
-                        BaseLog.JSON -> {
+                        VLog.JSON -> {
                             "json"
                         }
-                        BaseLog.XML -> {
+                        VLog.XML -> {
                             "xml"
                         }
                         else -> {
                             ""
                         }
                     },
+                    head,
                     msg
                 )
             )
@@ -39,6 +44,60 @@ abstract class LogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun innerInsertLog(logEntity: LogEntity)
 
-    @Query(value = "SELECT * FROM log")
-    abstract fun allList(): List<LogEntity>
+    /**
+     * 根据tag查询
+     */
+    fun logList(
+        tag: String?,
+        isIgnoreCase: Boolean = true,
+        level: String,
+        type: String,
+        time: Long
+    ): List<LogEntity>? {
+        val leveArray = level.split("|").toTypedArray()
+        val typeArray = type.split("|").toTypedArray()
+        if (tag.isNullOrEmpty()) {
+            return innerLogList(leveArray, typeArray, time)
+        }
+        if (isIgnoreCase) {
+            return innerLogListByTagWithIgnoreCase(
+                "%$tag%",
+                "%${tag.lowercase(Locale.getDefault())}%",
+                "%${tag.uppercase(Locale.getDefault())}%",
+                leveArray,
+                typeArray,
+                time
+            )
+        }
+        return innerLogListByTag("%$tag%", leveArray, typeArray, time)
+    }
+
+    @Query(value = "SELECT * FROM log WHERE level IN (:level) AND type IN (:type) AND time >= :time")
+    abstract fun innerLogList(
+        level: Array<out String>,
+        type: Array<out String>,
+        time: Long
+    ): List<LogEntity>?
+
+    @Query(value = "SELECT * FROM log WHERE tag LIKE :tag AND level IN (:level) AND type IN (:type) AND time >= :time")
+    abstract fun innerLogListByTag(
+        tag: String,
+        level: Array<out String>,
+        type: Array<out String>,
+        time: Long
+    ): List<LogEntity>?
+
+    @Query(value = "SELECT * FROM log WHERE (tag LIKE :tag OR tag LIKE :tagLowerCase OR tag LIKE :tagUpperCase) AND level IN (:level) AND type IN (:type) AND time >= :time")
+    abstract fun innerLogListByTagWithIgnoreCase(
+        tag: String,
+        tagLowerCase: String,
+        tagUpperCase: String,
+        level: Array<out String>,
+        type: Array<out String>,
+        time: Long
+    ): List<LogEntity>?
+
+    @Query(value = "DELETE FROM log WHERE time < :time")
+    abstract fun deleteOverLifeData(time: Long)
+
 }

@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "54326baaaf59c31bd3d14177f206f0cf",
+    "identityHash": "01c437d7f8ca65defcd16543fcc44674",
     "entities": [
       {
         "tableName": "log",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `time` INTEGER NOT NULL, `tag` TEXT, `level` TEXT NOT NULL, `type` TEXT, `msg` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `time` INTEGER NOT NULL, `tag` TEXT, `level` TEXT NOT NULL, `type` TEXT, `head` TEXT, `msg` TEXT)",
         "fields": [
           {
             "fieldPath": "id",
@@ -39,6 +39,12 @@
             "notNull": false
           },
           {
+            "fieldPath": "head",
+            "columnName": "head",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
             "fieldPath": "msg",
             "columnName": "msg",
             "affinity": "TEXT",
@@ -58,7 +64,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '54326baaaf59c31bd3d14177f206f0cf')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '01c437d7f8ca65defcd16543fcc44674')"
     ]
   }
 }

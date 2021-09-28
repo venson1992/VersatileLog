@@ -9,6 +9,7 @@ import com.tencent.wcdb.room.db.WCDBOpenHelperFactory
 import com.venson.versatile.log.LogEncryptJNI
 import com.venson.versatile.log.VLog
 import com.venson.versatile.log.database.dao.LogDao
+import com.venson.versatile.log.work.DefaultExecutorSupplier
 
 @Database(
     entities = [LogEntity::class],
@@ -19,7 +20,7 @@ abstract class LogDatabase : RoomDatabase() {
     abstract fun logDao(): LogDao
 
     companion object {
-        private const val DATABASE_NAME = "dp_versatile_log"
+        private const val DATABASE_NAME = "db_versatile_log"
 
         @Volatile
         private var instance: LogDatabase? = null
@@ -54,6 +55,14 @@ abstract class LogDatabase : RoomDatabase() {
                     .build()
                     .also {
                         instance = it
+                        /*
+                        删除本地化时效外的数据
+                         */
+                        DefaultExecutorSupplier.instance.forBackgroundTasks().execute {
+                            val time = VLog.logStorageLifeInDay() * 24 * 60 * 60 * 1000L
+                            val current = System.currentTimeMillis()
+                            it.logDao().deleteOverLifeData(current - time)
+                        }
                     }
             }
         }
