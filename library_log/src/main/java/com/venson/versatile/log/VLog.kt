@@ -13,14 +13,15 @@ object VLog {
     /*
     日志类型
      */
-    const val V = 0x1
-    const val D = 0x2
-    const val I = 0x3
-    const val W = 0x4
-    const val E = 0x5
-    const val A = 0x6
-    const val JSON = 0x7
-    const val XML = 0x8
+    const val V = 0x01
+    const val D = 0x02
+    const val I = 0x03
+    const val W = 0x04
+    const val E = 0x05
+    const val A = 0x06
+    const val JSON = 0x07
+    const val XML = 0x08
+    const val HTTP = 0x09
 
     //providerAction
     const val ACTION_PROVIDER = "com.venson.versatile.log.PROVIDER"

@@ -59,7 +59,7 @@ internal abstract class BasePrint {
         /*
         本地化日志
          */
-        if (VLog.saveLogEnable()) {
+        if (type != VLog.HTTP && VLog.saveLogEnable()) {
             VLog.applicationContext()?.let {
                 LogDatabase.getInstance(it).logDao().insertLog(tag, type, header, content)
             }
@@ -90,6 +90,7 @@ internal abstract class BasePrint {
             VLog.W -> Log.w(tag, sub)
             VLog.E -> Log.e(tag, sub)
             VLog.A -> Log.wtf(tag, sub)
+            VLog.HTTP -> Log.v(tag, sub)
             else -> Log.d(tag, sub)
         }
     }

@@ -89,6 +89,8 @@ project.afterEvaluate {
 
 dependencies {
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion"
+    //okhttp
+    compileOnly("com.squareup.okhttp3:okhttp:3.12.13")
     //gson
     implementation 'com.google.code.gson:gson:2.8.8'
     //room

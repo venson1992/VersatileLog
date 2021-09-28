@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.venson.versatile.app.databinding.ActivityMainBinding
 import com.venson.versatile.log.*
+import com.venson.versatile.log.interceptor.LogInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.OkHttpClient
@@ -30,7 +31,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainAdapter: MainAdapter
 
     private val okHttpClient by lazy {
-        OkHttpClient()
+        OkHttpClient.Builder()
+            .addInterceptor(LogInterceptor())
+            .build()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -255,7 +258,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val response = okHttpClient.newCall(request).execute()
                 val data = response.body()?.string()
-                data.logXml("xml")
+//                data.logXml("xml")
             } catch (e: Exception) {
                 e.printStackTraceByVLog()
             }
@@ -275,7 +278,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 val response = okHttpClient.newCall(request).execute()
                 val data = response.body()?.string()
-                data.logJson("json")
+//                data.logJson("json")
             } catch (e: Exception) {
                 e.printStackTraceByVLog()
             }
