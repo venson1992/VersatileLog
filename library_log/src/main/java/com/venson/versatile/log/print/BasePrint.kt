@@ -3,6 +3,7 @@ package com.venson.versatile.log.print
 import android.util.Log
 import com.venson.versatile.log.VLog
 import com.venson.versatile.log.database.LogDatabase
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 /**
  * 打印接口
@@ -17,11 +18,10 @@ internal abstract class BasePrint {
         //输出JSON缩进字符长度
         const val JSON_INDENT = 4
 
-        //换行符
-        val LINE_SEPARATOR: String = System.getProperty("line.separator")?.toString() ?: "\n"
-
         //默认空
         const val NULL_TIPS = "Log with null object"
+
+        private val mLock: ReentrantReadWriteLock = ReentrantReadWriteLock()
     }
 
     /**
@@ -33,22 +33,28 @@ internal abstract class BasePrint {
         打印日志
          */
         if (VLog.printLogEnable()) {
-            printLine(type, tag, true)
-            printSub(type, tag, header)
-            var index = 0
-            val length = content.length
-            val countOfSub = length / MAX_LENGTH
-            if (countOfSub > 0) {
-                for (i in 0 until countOfSub) {
-                    val sub = content.substring(index, index + MAX_LENGTH)
-                    printSub(type, tag, sub)
-                    index += MAX_LENGTH
+            val writeLock = mLock.writeLock()
+            try {
+                writeLock.lock()
+                printLine(type, tag, true)
+                printSub(type, tag, header)
+                var index = 0
+                val length = content.length
+                val countOfSub = length / MAX_LENGTH
+                if (countOfSub > 0) {
+                    for (i in 0 until countOfSub) {
+                        val sub = content.substring(index, index + MAX_LENGTH)
+                        printSub(type, tag, sub)
+                        index += MAX_LENGTH
+                    }
+                    printSub(type, tag, content.substring(index, length))
+                } else {
+                    printSub(type, tag, content)
                 }
-                printSub(type, tag, content.substring(index, length))
-            } else {
-                printSub(type, tag, content)
+                printLine(type, tag, false)
+            } finally {
+                writeLock.unlock()
             }
-            printLine(type, tag, false)
         }
         /*
         本地化日志
