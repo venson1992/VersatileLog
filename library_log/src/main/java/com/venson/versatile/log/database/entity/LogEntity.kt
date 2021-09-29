@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 data class LogEntity(
 
     //自增主键，构造函数赋值为null
-    @PrimaryKey(autoGenerate = true) var id: Int?,
+    @PrimaryKey(autoGenerate = true) var id: Long?,
 
     var time: Long,
 

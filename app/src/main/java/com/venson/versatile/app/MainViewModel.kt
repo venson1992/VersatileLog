@@ -40,6 +40,13 @@ class MainViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             packageNameList.postValue(VLog.getSupportedPackageNameList())
             getData(context)//加载完应用列表
+            getHttpLogData(context)
+        }
+    }
+
+    fun getHttpLogData(context: Context) {
+        viewModelScope.launch(Dispatchers.IO) {
+            LogDatabase.getInstance(context).httpLogDao().getAllLog()
         }
     }
 

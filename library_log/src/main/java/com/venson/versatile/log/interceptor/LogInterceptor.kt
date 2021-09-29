@@ -42,6 +42,9 @@ class LogInterceptor(
         if (!VLog.printLogEnable() && !VLog.saveLogEnable()) {
             return chain.proceed(chain.request())
         }
+        /*
+        request
+         */
         val startTime = SystemClock.elapsedRealtime()
         val request = try {
             chain.request()
@@ -51,21 +54,15 @@ class LogInterceptor(
         } ?: let {
             return null
         }
-        val response = try {
-            chain.proceed(request)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } ?: let {
-            return null
-        }
-        val endTime = SystemClock.elapsedRealtime()
-        val duration = endTime - startTime
         val requestContent = StringBuilder()
         /*
         method url
          */
+        var method = ""
+        var url = ""
         try {
+            method = request.method().uppercase()
+            url = request.url().toString()
             requestContent.appendDataAndLine(
                 request.method().uppercase() + "  " + request.url().toString()
             )
@@ -97,6 +94,21 @@ class LogInterceptor(
                 requestContent.appendDataAndLine("Params : $it")
             }
         }
+        printRequest(requestContent.toString())
+        val columnId = saveRequest(url, method, requestContent.toString(), startTime)
+        /*
+        response
+         */
+        val response = try {
+            chain.proceed(request)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        } ?: let {
+            return null
+        }
+        val endTime = SystemClock.elapsedRealtime()
+        val duration = endTime - startTime
         /*
         response
          */
@@ -128,8 +140,17 @@ class LogInterceptor(
                 "other-type=" + responseBody.contentType()
             }
         }
-        printLog(requestContent.toString(), responseString, duration)
-        saveLog(requestContent.toString(), responseString, startTime, endTime, duration)
+        printResponse(requestContent.toString(), responseString, duration)
+        updateResponse(
+            columnId,
+            url,
+            method,
+            requestContent.toString(),
+            startTime,
+            responseString,
+            endTime,
+            duration
+        )
         return response
     }
 
@@ -219,14 +240,28 @@ class LogInterceptor(
     }
 
     /**
-     * 打印日志
+     * 打印请求体
      */
-    private fun printLog(request: String?, response: String?, duration: Long) {
-        if (!VLog.printLogEnable()) {
+    private fun printRequest(request: String?) {
+        if (!VLog.printLogEnable() || (level != LEVEL_ALL && level != LEVEL_REQUEST)) {
             return
         }
         val message = StringBuilder()
-        message.append("----------Request Start----------")
+        message.appendDataAndLine("----------Request Start----------")
+        message.appendDataAndLine(request)
+        message.appendDataAndLine("----------Request End----------")
+        HTTPPrint.print(VLog.HTTP, tag, "", message.toString())
+    }
+
+    /**
+     * 打印日志
+     */
+    private fun printResponse(request: String?, response: String?, duration: Long) {
+        if (!VLog.printLogEnable() || level == LEVEL_NONE) {
+            return
+        }
+        val message = StringBuilder()
+        message.appendDataAndLine("----------Response Start----------")
         if (level == LEVEL_ALL || level == LEVEL_REQUEST) {
             message.appendDataAndLine(request)
         }
@@ -235,17 +270,36 @@ class LogInterceptor(
                 .appendDataAndLine(response)
         }
         message.appendDataAndLine("Time : $duration ms")
-        message.appendDataAndLine("----------Request End----------")
+        message.appendDataAndLine("----------Response End----------")
         HTTPPrint.print(VLog.HTTP, tag, "", message.toString())
+    }
+
+    private fun saveRequest(
+        url: String?,
+        method: String?,
+        request: String?,
+        startTime: Long,
+    ): Long {
+        if (!VLog.saveLogEnable()) {
+            return -1L
+        }
+        VLog.applicationContext()?.let {
+            return LogDatabase.getInstance(it).httpLogDao()
+                .insertLog(url, method, request, null, startTime, 0, 0)
+        }
+        return -1L
     }
 
     /**
      * 本地化日志
      */
-    private fun saveLog(
+    private fun updateResponse(
+        columnId: Long,
+        url: String?,
+        method: String?,
         request: String?,
-        response: String?,
         startTime: Long,
+        response: String?,
         endTime: Long,
         duration: Long
     ) {
@@ -254,7 +308,7 @@ class LogInterceptor(
         }
         VLog.applicationContext()?.let {
             LogDatabase.getInstance(it).httpLogDao()
-                .insertLog(request, response, startTime, endTime, duration)
+                .updateLog(columnId, url, method, request, response, startTime, endTime, duration)
         }
     }
 }
