@@ -1,7 +1,10 @@
 package com.venson.versatile.log
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.annotation.IntRange
+import com.venson.versatile.log.database.LogDatabase
 
 /**
  * 日志工具类
@@ -125,6 +128,7 @@ object VLog {
      * 默认开启自动初始化
      * 若要关闭自动逻辑，请在宿主APP的application中attachContext方法中调用该方法关闭
      */
+    @JvmStatic
     fun automaticEnable(enable: Boolean): VLog {
         isAutoMaticInitial = enable
         return this
@@ -133,6 +137,7 @@ object VLog {
     /**
      * 是否开启自动注册
      */
+    @JvmStatic
     fun automaticEnable(): Boolean {
         return isAutoMaticInitial
     }
@@ -141,6 +146,7 @@ object VLog {
      * 初始化application
      * 手动初始化，需要现在application关闭自动初始化
      */
+    @JvmStatic
     fun init(context: Context): VLog {
         applicationContext = context.applicationContext
         return this
@@ -149,6 +155,7 @@ object VLog {
     /**
      * 获取applicationContext
      */
+    @JvmStatic
     fun applicationContext(): Context? {
         return applicationContext
     }
@@ -156,6 +163,7 @@ object VLog {
     /**
      * 设置数据库加密密钥
      */
+    @JvmStatic
     fun encryptedKey(key: String): VLog {
         encryptKey = key
         return this
@@ -164,6 +172,7 @@ object VLog {
     /**
      * 数据库加密密钥
      */
+    @JvmStatic
     fun encryptedKey(): String? {
         return encryptKey
     }
@@ -172,6 +181,7 @@ object VLog {
      * 设置日志本地化存储有效期
      * @param day 有效范围1-365天
      */
+    @JvmStatic
     fun logStorageLifeInDay(@IntRange(from = 1L, to = 365L) day: Int): VLog {
         storageLifeInDay = day
         return this
@@ -180,8 +190,46 @@ object VLog {
     /**
      * 获取本地化存储时效
      */
+    @JvmStatic
     fun logStorageLifeInDay(): Int {
         return storageLifeInDay
+    }
+
+    /**
+     * 获取数据库路径
+     * @param packageName 查看指定应用的数据库路径，默认当前应用的包名
+     */
+    @JvmStatic
+    fun logDatabasePath(packageName: String? = null): String {
+        val context = applicationContext() ?: let {
+            throw Exception("VLog 未初始化")
+        }
+        return LogDatabase.getDatabasePath(context, packageName)
+    }
+
+    /**
+     * 获取本地已安装的接入该日志的应用列表
+     */
+    @JvmStatic
+    fun getSupportedPackageNameList(): List<String> {
+        val context = applicationContext() ?: let {
+            throw Exception("VLog 未初始化")
+        }
+        val packageManager = context.packageManager
+        val filter = Intent("com.venson.versatile.log.PROVIDER")
+        val resolveInfoList = packageManager.queryIntentActivities(
+            filter, PackageManager.GET_RESOLVED_FILTER
+        )
+        if (resolveInfoList.isNullOrEmpty()) {
+            return emptyList()
+        }
+        val list = mutableListOf<String>()
+        resolveInfoList.forEach { resolveInfo ->
+            resolveInfo?.activityInfo?.packageName?.let { packagename ->
+                list.add(packagename)
+            }
+        }
+        return list
     }
 
     @JvmStatic

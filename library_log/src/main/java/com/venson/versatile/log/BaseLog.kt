@@ -35,39 +35,14 @@ internal object BaseLog {
         /*
         content解析
          */
-        var isObject = false
-        val content: String? = if (tag == null && msg == null) {
-            BasePrint.NULL_TIPS
-        } else if (msg == null) {
-            null
-        } else if (msg is String) {
-            msg
-        } else if (msg is Throwable) {
-            Log.getStackTraceString(msg)
-        } else {
-            try {
-                gson.toJson(msg).let {
-                    if (it.isNullOrEmpty() || it == "{}") {
-                        isObject = false
-                        msg.toString()
-                    } else {
-                        isObject = true
-                        it
-                    }
-                }
-            } catch (e: Exception) {
-                isObject = false
-                msg.toString()
-            }
-        }
         val headContent = headString ?: ""
-        val msgContent = content ?: ""
+        val msgContent = parseData(tag, msg) ?: ""
         /*
         打印日志
          */
         if (VLog.printLogEnable() || VLog.saveLogEnable()) {
             when {
-                type == VLog.JSON || isObject -> {
+                type == VLog.JSON || JsonPrint.isJson(msgContent) -> {
                     JsonPrint.print(type, tag, headContent, msgContent)
                 }
                 type == VLog.XML -> {
@@ -77,6 +52,60 @@ internal object BaseLog {
                     DefaultPrint.print(type, tag, headContent, msgContent)
                 }
             }
+        }
+    }
+
+    /**
+     * 解析对象
+     */
+    private fun parseData(tag: String?, msg: Any?): String? {
+        if (tag == null && msg == null) {
+            return BasePrint.NULL_TIPS
+        }
+        if (msg == null) {
+            return null
+        }
+        if (msg is String) {
+            return msg
+        }
+        if (msg is Throwable) {
+            return Log.getStackTraceString(msg)
+        }
+        if (msg is Collection<*>) {
+            val list = mutableListOf<String>()
+            msg.forEach { item ->
+                parseData(tag, item)?.let {
+                    list.add(it)
+                }
+            }
+            return parseObject(list)
+        }
+        if (msg is Array<*>) {
+            val list = mutableListOf<String>()
+            msg.forEach { item ->
+                parseData(tag, item)?.let {
+                    list.add(it)
+                }
+            }
+            return parseObject(list)
+        }
+        return parseObject(msg)
+    }
+
+    /**
+     * gson解析未知对象
+     */
+    private fun parseObject(msg: Any?): String {
+        return try {
+            gson.toJson(msg).let {
+                if (it.isNullOrEmpty() || it == "{}") {
+                    msg.toString()
+                } else {
+                    it
+                }
+            }
+        } catch (e: Exception) {
+            msg.toString()
         }
     }
 

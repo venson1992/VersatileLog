@@ -2,6 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.venson.versatile.log">
 
+    <queries>
+        <intent>
+            <action android:name="com.venson.versatile.log.PROVIDER" />
+        </intent>
+    </queries>
+
     <application>
         <!-- 自动初始化 -->
         <provider

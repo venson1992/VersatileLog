@@ -179,10 +179,13 @@ class MainActivity : AppCompatActivity() {
 //            viewModel.isOtherChecked.value = isChecked
 //        }
         observeData()
-        viewModel.getData(applicationContext)
+        viewModel.getPackageNameList(applicationContext)
     }
 
     private fun observeData() {
+        viewModel.packageNameList.observe(this) {
+            it.logD("packageNameList")
+        }
         viewModel.tag.observe(this) {
             binding.bottomSheetLayout.tagEditText.setText(it)
             viewModel.getData(applicationContext)

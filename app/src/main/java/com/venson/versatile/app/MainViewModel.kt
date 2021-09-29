@@ -10,7 +10,11 @@ import com.venson.versatile.log.database.entity.LogEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class MainViewModel() : ViewModel() {
+class MainViewModel : ViewModel() {
+
+    val packageNameList = MutableLiveData<List<String>>()
+    val packageNameIndex = MutableLiveData<Int>()
+    val isLogChecked = MutableLiveData(true)
 
     val tag = MutableLiveData<String?>()
     val isIgnoreCase = MutableLiveData(true)
@@ -30,6 +34,14 @@ class MainViewModel() : ViewModel() {
     val isOtherChecked = MutableLiveData(true)
 
     val data: MutableLiveData<List<LogEntity>?> = MutableLiveData()
+
+    fun getPackageNameList(context: Context) {
+        packageNameIndex.value = 0
+        viewModelScope.launch(Dispatchers.IO) {
+            packageNameList.postValue(VLog.getSupportedPackageNameList())
+            getData(context)//加载完应用列表
+        }
+    }
 
     fun getData(context: Context) {
         viewModelScope.launch(Dispatchers.IO) {
