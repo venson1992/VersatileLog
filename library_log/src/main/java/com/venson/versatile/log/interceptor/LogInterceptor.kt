@@ -18,11 +18,14 @@ import okio.Buffer
 
 /**
  * 针对okhttp的日志拦截器
+ * @param tag tag
  * @param level @Level
+ * @param hardContentType @ContentType default默认解析，否则按预设格式解析
  */
 class LogInterceptor(
     val tag: String = DEFAULT_TAG,
-    @Level val level: Int = LEVEL_ALL
+    @Level val level: Int = LEVEL_ALL,
+    @ContentType val hardContentType: Int = TYPE_DEFAULT
 ) : Interceptor {
 
     companion object {
@@ -32,11 +35,19 @@ class LogInterceptor(
         const val LEVEL_ALL = 0x01
         const val LEVEL_REQUEST = 0x02
         const val LEVEL_RESPONSE = 0x03
+
+        const val TYPE_DEFAULT = 0x00
+        const val TYPE_XML = 0x01
+        const val TYPE_JSON = 0x02
     }
 
     @IntDef(LEVEL_NONE, LEVEL_ALL, LEVEL_REQUEST, LEVEL_RESPONSE)
     @Retention(AnnotationRetention.SOURCE)
     annotation class Level
+
+    @IntDef(TYPE_DEFAULT, TYPE_XML, TYPE_JSON)
+    @Retention(AnnotationRetention.SOURCE)
+    annotation class ContentType
 
     override fun intercept(chain: Interceptor.Chain): Response? {
         /*
@@ -122,7 +133,11 @@ class LogInterceptor(
             responseString = if (isPlainText(contentType)) {
                 try {
                     response.peekBody(Long.MAX_VALUE).string().let {
-                        if (isPlainText(contentType, "xml")
+                        if (hardContentType == TYPE_JSON) {
+                            JsonPrint.parseContent(it)
+                        } else if (hardContentType == TYPE_XML) {
+                            XmlPrint.parseContent(it)
+                        } else if (isPlainText(contentType, "xml")
                             || isPlainText(contentType, "html")
                         ) {
                             XmlPrint.parseContent(it)
