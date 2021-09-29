@@ -122,16 +122,16 @@ class LogInterceptor(
             responseString = if (isPlainText(contentType)) {
                 try {
                     response.peekBody(Long.MAX_VALUE).string().let {
-                        if (isPlainText(contentType, "json")
+                        if (isPlainText(contentType, "xml")
+                            || isPlainText(contentType, "html")
+                        ) {
+                            XmlPrint.parseContent(it)
+                        } else if (isPlainText(contentType, "json")
                             || isPlainText(contentType, "plain")
                             || isPlainText(contentType, "text")
                             || isPlainText(contentType, "form")
                         ) {
                             JsonPrint.parseContent(it)
-                        } else if (isPlainText(contentType, "xml")
-                            || isPlainText(contentType, "html")
-                        ) {
-                            XmlPrint.parseContent(it)
                         } else {
                             DefaultPrint.parseContent(it)
                         }
@@ -245,6 +245,7 @@ class LogInterceptor(
             return
         }
         val message = StringBuilder()
+        message.append(" ")
         message.appendDataAndLine("----------Request Start----------")
         message.appendDataAndLine(request)
         message.appendDataAndLine("----------Request End----------")
@@ -264,6 +265,7 @@ class LogInterceptor(
             return
         }
         val message = StringBuilder()
+        message.append(" ")
         message.appendDataAndLine("----------Response Start----------")
         if (level == LEVEL_ALL || level == LEVEL_REQUEST) {
             message.appendDataAndLine(request)

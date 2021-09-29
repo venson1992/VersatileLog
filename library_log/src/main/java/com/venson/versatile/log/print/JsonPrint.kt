@@ -10,22 +10,23 @@ import org.json.JSONObject
 internal object JsonPrint : BasePrint() {
 
     override fun parseContent(msg: String): String {
+        val content = msg.trim()
         return try {
             when {
-                isJsonObject(msg) -> {
-                    val jsonObject = JSONObject(msg)
+                isJsonObject(content) -> {
+                    val jsonObject = JSONObject(content)
                     jsonObject.toString(JSON_INDENT)
                 }
-                isJsonArray(msg) -> {
-                    val jsonArray = JSONArray(msg)
+                isJsonArray(content) -> {
+                    val jsonArray = JSONArray(content)
                     jsonArray.toString(JSON_INDENT)
                 }
                 else -> {
-                    msg
+                    content
                 }
             }
         } catch (e: JSONException) {
-            msg
+            content
         }
     }
 
@@ -43,7 +44,7 @@ internal object JsonPrint : BasePrint() {
      * 判断文本是否为json
      */
     private fun isJsonObject(content: String?): Boolean {
-        if (content?.startsWith("{") == true && content.startsWith("}")) {
+        if (content?.startsWith("{") == true && content.endsWith("}")) {
             return true
         }
         return false
@@ -53,7 +54,7 @@ internal object JsonPrint : BasePrint() {
      * 判断文本是否为json
      */
     private fun isJsonArray(content: String?): Boolean {
-        if (content?.startsWith("[") == true && content.startsWith("]")) {
+        if (content?.startsWith("[") == true && content.endsWith("]")) {
             if (content.contains("{") && content.contains("}")) {
                 return true
             }
