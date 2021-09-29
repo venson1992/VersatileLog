@@ -14,6 +14,7 @@ abstract class HttpLogDao {
         url: String?,
         method: String?,
         request: String?,
+        contentType: String?,
         response: String?,
         startTime: Long,
         endTime: Long,
@@ -23,13 +24,21 @@ abstract class HttpLogDao {
             innerGetLog(columnId)?.let {
                 innerUpdateLog(
                     HttpLogEntity(
-                        columnId, url, method, request, response, startTime, endTime, duration
+                        columnId,
+                        url,
+                        method,
+                        request,
+                        contentType,
+                        response,
+                        startTime,
+                        endTime,
+                        duration
                     )
                 )
                 return
             }
         }
-        insertLog(url, method, request, response, startTime, endTime, duration)
+        insertLog(url, method, request, contentType, response, startTime, endTime, duration)
     }
 
     /**
@@ -39,6 +48,7 @@ abstract class HttpLogDao {
         url: String?,
         method: String?,
         request: String?,
+        contentType: String?,
         response: String?,
         startTime: Long,
         endTime: Long,
@@ -46,7 +56,7 @@ abstract class HttpLogDao {
     ): Long {
         return innerInsertLog(
             HttpLogEntity(
-                null, url, method, request, response, startTime, endTime, duration
+                null, url, method, request, contentType, response, startTime, endTime, duration
             )
         )
     }

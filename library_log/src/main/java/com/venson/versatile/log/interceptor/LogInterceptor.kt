@@ -10,7 +10,10 @@ import com.venson.versatile.log.print.DefaultPrint
 import com.venson.versatile.log.print.HTTPPrint
 import com.venson.versatile.log.print.JsonPrint
 import com.venson.versatile.log.print.XmlPrint
-import okhttp3.*
+import okhttp3.Interceptor
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.Response
 import okio.Buffer
 
 /**
@@ -114,19 +117,19 @@ class LogInterceptor(
          */
         val responseBody = response.body()
         var responseString: String? = null
+        val contentType = responseBody?.contentType()?.toString() ?: "contentType un-known"
         if (null != responseBody) {
-            val type = responseBody.contentType()
-            responseString = if (isPlainText(type)) {
+            responseString = if (isPlainText(contentType)) {
                 try {
                     response.peekBody(Long.MAX_VALUE).string().let {
-                        if (isPlainText(type, "json")
-                            || isPlainText(type, "plain")
-                            || isPlainText(type, "text")
-                            || isPlainText(type, "form")
+                        if (isPlainText(contentType, "json")
+                            || isPlainText(contentType, "plain")
+                            || isPlainText(contentType, "text")
+                            || isPlainText(contentType, "form")
                         ) {
                             JsonPrint.parseContent(it)
-                        } else if (isPlainText(type, "xml")
-                            || isPlainText(type, "html")
+                        } else if (isPlainText(contentType, "xml")
+                            || isPlainText(contentType, "html")
                         ) {
                             XmlPrint.parseContent(it)
                         } else {
@@ -137,16 +140,17 @@ class LogInterceptor(
                     Log.getStackTraceString(e)
                 }
             } else {
-                "other-type=" + responseBody.contentType()
+                "other-type=$contentType"
             }
         }
-        printResponse(requestContent.toString(), responseString, duration)
+        printResponse(requestContent.toString(), contentType, responseString, duration)
         updateResponse(
             columnId,
             url,
             method,
             requestContent.toString(),
             startTime,
+            contentType,
             responseString,
             endTime,
             duration
@@ -172,7 +176,7 @@ class LogInterceptor(
                 if (sb.isNotEmpty()) {
                     sb.append(",")
                 }
-                if (isPlainText(partBody.contentType())) {
+                if (isPlainText(partBody.contentType()?.toString() ?: "")) {
                     sb.append(readContent(partBody))
                 } else {
                     sb.append("other-param-type=").append(partBody.contentType())
@@ -191,16 +195,13 @@ class LogInterceptor(
      * @param mediaType 类型
      * @return Boolean
      */
-    private fun isPlainText(mediaType: MediaType?): Boolean {
-        mediaType?.toString()?.let {
-            return it.contains("plain", true)
-                    || it.contains("text", true)
-                    || it.contains("html", true)
-                    || it.contains("form", true)
-                    || it.contains("json", true)
-                    || it.contains("xml", true)
-        }
-        return false
+    private fun isPlainText(mediaType: String): Boolean {
+        return mediaType.contains("plain", true)
+                || mediaType.contains("text", true)
+                || mediaType.contains("html", true)
+                || mediaType.contains("form", true)
+                || mediaType.contains("json", true)
+                || mediaType.contains("xml", true)
     }
 
     /**
@@ -209,11 +210,8 @@ class LogInterceptor(
      * @param mediaType 类型
      * @return Boolean
      */
-    private fun isPlainText(mediaType: MediaType?, needType: String): Boolean {
-        mediaType?.toString()?.let {
-            return it.contains(needType, true)
-        }
-        return false
+    private fun isPlainText(mediaType: String, needType: String): Boolean {
+        return mediaType.contains(needType, true)
     }
 
     /**
@@ -256,7 +254,12 @@ class LogInterceptor(
     /**
      * 打印日志
      */
-    private fun printResponse(request: String?, response: String?, duration: Long) {
+    private fun printResponse(
+        request: String?,
+        contentType: String,
+        response: String?,
+        duration: Long
+    ) {
         if (!VLog.printLogEnable() || level == LEVEL_NONE) {
             return
         }
@@ -266,7 +269,7 @@ class LogInterceptor(
             message.appendDataAndLine(request)
         }
         if (level == LEVEL_ALL || level == LEVEL_RESPONSE) {
-            message.appendDataAndLine("Response Body : ")
+            message.appendDataAndLine("Response Body ( Content-Type = $contentType ): ")
                 .appendDataAndLine(response)
         }
         message.appendDataAndLine("Time : $duration ms")
@@ -284,8 +287,16 @@ class LogInterceptor(
             return -1L
         }
         VLog.applicationContext()?.let {
-            return LogDatabase.getInstance(it).httpLogDao()
-                .insertLog(url, method, request, null, startTime, 0, 0)
+            return LogDatabase.getInstance(it).httpLogDao().insertLog(
+                url,
+                method,
+                request,
+                "",
+                null,
+                startTime,
+                0,
+                0
+            )
         }
         return -1L
     }
@@ -299,6 +310,7 @@ class LogInterceptor(
         method: String?,
         request: String?,
         startTime: Long,
+        contentType: String,
         response: String?,
         endTime: Long,
         duration: Long
@@ -308,7 +320,17 @@ class LogInterceptor(
         }
         VLog.applicationContext()?.let {
             LogDatabase.getInstance(it).httpLogDao()
-                .updateLog(columnId, url, method, request, response, startTime, endTime, duration)
+                .updateLog(
+                    columnId,
+                    url,
+                    method,
+                    request,
+                    contentType,
+                    response,
+                    startTime,
+                    endTime,
+                    duration
+                )
         }
     }
 }

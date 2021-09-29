@@ -18,7 +18,7 @@ import com.venson.versatile.log.work.DefaultExecutorSupplier
 
 @Database(
     entities = [LogEntity::class, HttpLogEntity::class],
-    version = 3
+    version = 4
 )
 abstract class LogDatabase : RoomDatabase() {
 
@@ -53,7 +53,7 @@ abstract class LogDatabase : RoomDatabase() {
                     getDatabasePath(applicationContext)
                 )
                     .openHelperFactory(factory)
-                    .addMigrations(mMigration1_2, mMigration2_3)
+                    .addMigrations(mMigration1_2, mMigration2_3, mMigration3_4)
                     .build()
                     .also {
                         instance = it
@@ -112,6 +112,13 @@ abstract class LogDatabase : RoomDatabase() {
                 database.execSQL("ALTER TABLE http_log ADD COLUMN url TEXT")
                 database.execSQL("ALTER TABLE http_log ADD COLUMN method TEXT")
             }
+        }
+
+        private val mMigration3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE http_log ADD COLUMN contentType TEXT")
+            }
+
         }
     }
 }

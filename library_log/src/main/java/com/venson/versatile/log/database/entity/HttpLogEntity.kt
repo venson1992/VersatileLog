@@ -14,6 +14,8 @@ data class HttpLogEntity(
 
     var request: String?,
 
+    var contentType: String?,
+
     var response: String?,
 
     var startTime: Long,
