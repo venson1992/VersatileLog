@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.annotation.IntDef
 import com.venson.versatile.log.VLog
 import com.venson.versatile.log.appendDataAndLine
+import com.venson.versatile.log.database.LogDatabase
 import com.venson.versatile.log.print.DefaultPrint
 import com.venson.versatile.log.print.HTTPPrint
 import com.venson.versatile.log.print.JsonPrint
@@ -250,6 +251,10 @@ class LogInterceptor(
     ) {
         if (!VLog.saveLogEnable()) {
             return
+        }
+        VLog.applicationContext()?.let {
+            LogDatabase.getInstance(it).httpLogDao()
+                .insertLog(request, response, startTime, endTime, duration)
         }
     }
 }

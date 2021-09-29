@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.venson.versatile.log.VLog
 import com.venson.versatile.log.database.LogDatabase
-import com.venson.versatile.log.database.LogEntity
+import com.venson.versatile.log.database.entity.LogEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

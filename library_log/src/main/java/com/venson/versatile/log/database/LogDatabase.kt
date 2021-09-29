@@ -4,20 +4,27 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.tencent.wcdb.database.SQLiteCipherSpec
 import com.tencent.wcdb.room.db.WCDBOpenHelperFactory
 import com.venson.versatile.log.LogEncryptJNI
 import com.venson.versatile.log.VLog
+import com.venson.versatile.log.database.dao.HttpLogDao
 import com.venson.versatile.log.database.dao.LogDao
+import com.venson.versatile.log.database.entity.HttpLogEntity
+import com.venson.versatile.log.database.entity.LogEntity
 import com.venson.versatile.log.work.DefaultExecutorSupplier
 
 @Database(
-    entities = [LogEntity::class],
-    version = 1
+    entities = [LogEntity::class, HttpLogEntity::class],
+    version = 2
 )
 abstract class LogDatabase : RoomDatabase() {
 
     abstract fun logDao(): LogDao
+
+    abstract fun httpLogDao(): HttpLogDao
 
     companion object {
         private const val DATABASE_NAME = "db_versatile_log"
@@ -52,6 +59,7 @@ abstract class LogDatabase : RoomDatabase() {
                     "$path/database/$DATABASE_NAME"
                 )
                     .openHelperFactory(factory)
+                    .addMigrations(mMigration1_2)
                     .build()
                     .also {
                         instance = it
@@ -62,10 +70,25 @@ abstract class LogDatabase : RoomDatabase() {
                             val time = VLog.logStorageLifeInDay() * 24 * 60 * 60 * 1000L
                             val current = System.currentTimeMillis()
                             it.logDao().deleteOverLifeData(current - time)
+                            it.httpLogDao().deleteOverLifeData(current - time)
                         }
                     }
             }
         }
 
+        private val mMigration1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `http_log` (" +
+                            "`id` INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                            "`request` TEXT, " +
+                            "`response` TEXT, " +
+                            "`startTime` INTEGER NOT NULL, " +
+                            "`endTime` INTEGER NOT NULL, " +
+                            "`duration` INTEGER NOT NULL" +
+                            ")"
+                )
+            }
+        }
     }
 }

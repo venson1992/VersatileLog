@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.venson.versatile.app.databinding.ItemMainBinding
-import com.venson.versatile.log.database.LogEntity
+import com.venson.versatile.log.database.entity.LogEntity
 
 class MainAdapter : RecyclerView.Adapter<MainAdapter.ViewHolder>() {
 

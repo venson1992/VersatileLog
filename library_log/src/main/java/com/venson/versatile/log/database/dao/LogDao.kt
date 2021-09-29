@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.venson.versatile.log.VLog
-import com.venson.versatile.log.database.LogEntity
+import com.venson.versatile.log.database.entity.LogEntity
 import com.venson.versatile.log.work.DefaultExecutorSupplier
 import java.util.*
 
@@ -97,7 +97,7 @@ abstract class LogDao {
         time: Long
     ): List<LogEntity>?
 
-    @Query(value = "DELETE FROM log WHERE time < :time")
+    @Query(value = "DELETE FROM http_log WHERE startTime < :time")
     abstract fun deleteOverLifeData(time: Long)
 
 }
