@@ -60,14 +60,7 @@ class LogInterceptor(
         request
          */
         val startTime = SystemClock.elapsedRealtime()
-        val request = try {
-            chain.request()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } ?: let {
-            return null
-        }
+        val request = chain.request()
         val requestContent = StringBuilder()
         /*
         method url
@@ -113,14 +106,7 @@ class LogInterceptor(
         /*
         response
          */
-        val response = try {
-            chain.proceed(request)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } ?: let {
-            return null
-        }
+        val response = chain.proceed(request)
         val endTime = SystemClock.elapsedRealtime()
         val duration = endTime - startTime
         /*
