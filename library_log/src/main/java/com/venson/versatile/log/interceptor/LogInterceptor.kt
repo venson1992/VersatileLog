@@ -10,11 +10,9 @@ import com.venson.versatile.log.print.DefaultPrint
 import com.venson.versatile.log.print.HTTPPrint
 import com.venson.versatile.log.print.JsonPrint
 import com.venson.versatile.log.print.XmlPrint
-import okhttp3.Interceptor
-import okhttp3.MultipartBody
-import okhttp3.RequestBody
-import okhttp3.Response
+import okhttp3.*
 import okio.Buffer
+import java.net.URLDecoder
 
 /**
  * 针对okhttp的日志拦截器
@@ -166,38 +164,100 @@ class LogInterceptor(
      * @return 文本
      */
     private fun readRequestParamString(requestBody: RequestBody?): String? {
-        return if (requestBody is MultipartBody) { //判断是否有文件
-            val sb = java.lang.StringBuilder()
-            val parts = requestBody.parts()
-            var partBody: RequestBody
-            var i = 0
-            val size = parts.size
-            while (i < size) {
-                partBody = parts[i].body()
-                if (sb.isNotEmpty()) {
-                    sb.append(",")
+        return when (requestBody) {
+            is MultipartBody -> { //判断是否有文件
+                val sb = StringBuilder()
+                val buffer = Buffer()
+                requestBody.writeTo(buffer)
+                val postParams = buffer.readUtf8()
+                val splitNames = postParams.split("\n")
+                val names = mutableListOf<String>()
+                splitNames.forEach { splitName ->
+                    if (splitName.contains("Content-Disposition")) {
+                        names.add(
+                            splitName
+                                .replace(
+                                    "Content-Disposition: form-data; name=", ""
+                                )
+                                .replace("\"", "")
+                                .replace("\r", "")
+                        )
+                    }
                 }
-                if (isPlainText(partBody.contentType()?.toString() ?: "")) {
-                    sb.append(readContent(partBody))
-                } else {
-                    sb.append("other-param-type=").append(partBody.contentType())
+                requestBody.parts().forEachIndexed { index, part ->
+                    val partBody = part.body()
+                    val type = partBody.contentType()?.type() ?: ""
+                    if (type.contains("image", true)
+                        || type.contains("video", true)
+                        || type.contains("audio", true)
+                        || type.contains("application", true)
+                    ) {
+                        return@forEachIndexed
+                    }
+                    val key: String = try {
+                        names[index]
+                    } catch (e: Exception) {
+                        return@forEachIndexed
+                    }
+                    if (key.startsWith("application")) {
+                        return@forEachIndexed
+                    }
+                    val partBuffer = Buffer()
+                    partBody.writeTo(partBuffer)
+                    val value = partBuffer.readUtf8().let {
+                        try {
+                            URLDecoder.decode(it, "UTF-8")
+                        } catch (e: Exception) {
+                            it
+                        }
+                    }
+                    if (sb.isNotEmpty()) {
+                        sb.append("&")
+                    }
+                    sb.append("$key=$value")
                 }
-                i++
+                sb.toString()
             }
-            sb.toString()
-        } else {
-            readContent(requestBody)
+            is FormBody -> {
+                val sb = StringBuilder()
+                val size = requestBody.size()
+                for (index in 0 until size) {
+                    try {
+                        val key = requestBody.name(index) ?: ""
+                        val value = requestBody.value(index)
+                        if (key.trim().isNotEmpty()) {
+                            if (sb.isNotEmpty()) {
+                                sb.append("&")
+                            }
+                            sb.append("$key=$value")
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+                sb.toString()
+            }
+            else -> {
+                readContent(requestBody).let {
+                    try {
+                        URLDecoder.decode(it, "UTF-8")
+                    } catch (e: Exception) {
+                        it
+                    }
+                }
+            }
         }
     }
 
     /**
-     * 是否输出日志
+     * 预设格式
      *
      * @param mediaType 类型
      * @return Boolean
      */
     private fun isPlainText(mediaType: String): Boolean {
-        return mediaType.contains("plain", true)
+        return mediaType.trim().isEmpty()
+                || mediaType.contains("plain", true)
                 || mediaType.contains("text", true)
                 || mediaType.contains("html", true)
                 || mediaType.contains("form", true)
@@ -206,7 +266,7 @@ class LogInterceptor(
     }
 
     /**
-     * 是否输出日志
+     * 是否预设格式
      *
      * @param mediaType 类型
      * @return Boolean

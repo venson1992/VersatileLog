@@ -15,6 +15,7 @@ import com.venson.versatile.log.*
 import com.venson.versatile.log.interceptor.LogInterceptor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.net.URLEncoder
@@ -271,6 +272,13 @@ class MainActivity : AppCompatActivity() {
     private fun getJSON(url: String, referer: String? = null) {
         val request = Request.Builder()
             .url(url)
+            .post(
+                MultipartBody.Builder()
+                    .addFormDataPart("test", "123")
+                    .addFormDataPart("33", "浙江省")
+                    .addPart(MultipartBody.Part.createFormData("34", "福建省"))
+                    .build()
+            )
             .apply {
                 referer?.let {
                     addHeader("Referer", it)
