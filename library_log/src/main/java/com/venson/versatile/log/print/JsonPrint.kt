@@ -45,6 +45,13 @@ internal object JsonPrint : BasePrint() {
      */
     private fun isJsonObject(content: String?): Boolean {
         if (content?.startsWith("{") == true && content.endsWith("}")) {
+            if (content
+                    .replace("\n", "")
+                    .replace(" ", "")
+                    .contains("}{")
+            ) {
+                return false
+            }
             return true
         }
         return false
@@ -55,6 +62,13 @@ internal object JsonPrint : BasePrint() {
      */
     private fun isJsonArray(content: String?): Boolean {
         if (content?.startsWith("[") == true && content.endsWith("]")) {
+            if (content
+                    .replace("\n", "")
+                    .replace(" ", "")
+                    .contains("][")
+            ) {
+                return false
+            }
             if (content.contains("{") && content.contains("}")) {
                 return true
             }

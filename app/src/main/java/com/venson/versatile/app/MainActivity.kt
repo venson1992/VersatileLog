@@ -11,14 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.venson.versatile.app.databinding.ActivityMainBinding
-import com.venson.versatile.log.*
 import com.venson.versatile.log.interceptor.LogInterceptor
+import com.venson.versatile.log.logD
+import com.venson.versatile.log.printStackTraceByVLog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import java.net.URLEncoder
 
 class MainActivity : AppCompatActivity() {
 
@@ -63,34 +63,36 @@ class MainActivity : AppCompatActivity() {
             })
         }
         binding.testButton.setOnClickListener {
-            getHTML("https://developer.aliyun.com/mvn/guide")
-            val domain = "https://apis.map.qq.com/ws/district/v1"
-            val key = "OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77"
-            val referer = "https://lbs.qq.com/"
-            getJSON(
-                "$domain/search?&keyword=${URLEncoder.encode("浙江省", "UTF-8")}&key=$key",
-                referer
-            )
-            getJSON("$domain/getchildren?id=330000&key=$key", referer)
-            getJSON("$domain/getchildren?id=340000&key=$key", referer)
-            getJSON("$domain/getchildren?id=350000&key=$key", referer)
-            getJSON("$domain/getchildren?id=210000&key=$key", referer)
-            "测试sdgsd数据".logE()
-            "测sgvs试数据".logW()
-            "测sdvgsd试数据".logA()
-            "{\"test\":\"value\"}".logJson()
-            it.logD()
-            it.also {
-                lifecycleScope.launch {
-                    logW()
-                    try {
-                        val d: String? = null
-                        d!!.toString()
-                    } catch (e: Exception) {
-                        e.logW("nullTest")
-                    }
-                }
-            }
+//            getHTML("https://developer.aliyun.com/mvn/guide")
+//            val domain = "https://apis.map.qq.com/ws/district/v1"
+//            val key = "OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77"
+//            val referer = "https://lbs.qq.com/"
+//            getJSON(
+//                "$domain/search?&keyword=${URLEncoder.encode("浙江省", "UTF-8")}&key=$key",
+//                referer
+//            )
+//            getJSON("$domain/getchildren?id=330000&key=$key", referer)
+//            getJSON("$domain/getchildren?id=340000&key=$key", referer)
+//            getJSON("$domain/getchildren?id=350000&key=$key", referer)
+//            getJSON("$domain/getchildren?id=210000&key=$key", referer)
+//            "测试sdgsd数据".logE()
+//            "测sgvs试数据".logW()
+//            "测sdvgsd试数据".logA()
+//            "{\"test\":\"value\"}".logJson()
+//            it.logD()
+//            it.also {
+//                lifecycleScope.launch {
+//                    logW()
+//                    try {
+//                        val d: String? = null
+//                        d!!.toString()
+//                    } catch (e: Exception) {
+//                        e.logW("nullTest")
+//                    }
+//                }
+//            }
+            ("{\"status\": 405,\"message\": \"请求方法错误，请更正为：GET\"}" +
+                    "   {\"status\": 405,\"message\": \"请求方法错误，请更正为：GET\"}").logD()
         }
         binding.recyclerView.apply {
             layoutManager = LinearLayoutManager(
