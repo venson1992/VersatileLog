@@ -3,8 +3,12 @@ package com.venson.versatile.log
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import androidx.annotation.FloatRange
 import androidx.annotation.IntRange
 import com.venson.versatile.log.database.LogDatabase
+import com.venson.versatile.log.work.DefaultExecutorSupplier
+import com.venson.versatile.log.work.ZipDatabaseTask
+import java.io.File
 
 /**
  * 日志工具类
@@ -208,6 +212,35 @@ object VLog {
     }
 
     /**
+     * @param zipFilePath 导出的压缩包文件名
+     * @param packageName 指定应用包名
+     * @param progressListener 导出监听
+     */
+    @JvmStatic
+    fun logDatabaseZipFile(
+        zipFilePath: String? = null,
+        packageName: String? = null,
+        progressListener: OnDatabaseFileZipProgressListener
+    ) {
+        val context = applicationContext() ?: let {
+            progressListener.onFailure(Throwable("VLog 未初始化"))
+            return
+        }
+        val path = logDatabasePath(packageName)
+        val pathList = mutableListOf<String>()
+        pathList.add(path)
+        pathList.add("$path-shm")
+        pathList.add("$path-wal")
+        DefaultExecutorSupplier.instance.forBackgroundTasks().execute(
+            ZipDatabaseTask(
+                packageName ?: context.packageName,
+                zipFilePath,
+                progressListener
+            )
+        )
+    }
+
+    /**
      * 获取本地已安装的接入该日志的应用列表
      */
     @JvmStatic
@@ -220,7 +253,7 @@ object VLog {
         val resolveInfoList = packageManager.queryIntentActivities(
             filter, PackageManager.GET_RESOLVED_FILTER
         )
-        if (resolveInfoList.isNullOrEmpty()) {
+        if (resolveInfoList.isEmpty()) {
             return emptyList()
         }
         val list = mutableListOf<String>()
@@ -340,5 +373,13 @@ object VLog {
     @JvmStatic
     fun xml(tag: String?, xml: String?) {
         BaseLog.printLog(XML, xml, tag)
+    }
+
+    interface OnDatabaseFileZipProgressListener {
+        fun onProgress(@FloatRange(from = 0.0, to = 1.0) progress: Float)
+
+        fun onSuccess(zipFile: File)
+
+        fun onFailure(throwable: Throwable)
     }
 }

@@ -32,6 +32,9 @@ abstract class LogDatabase : RoomDatabase() {
         @Volatile
         private var instance: LogDatabase? = null
 
+        @Volatile
+        private var externalInstance: LogDatabase? = null
+
         @JvmStatic
         fun getInstance(applicationContext: Context) = instance ?: synchronized(this) {
             instance ?: let {
@@ -47,16 +50,58 @@ abstract class LogDatabase : RoomDatabase() {
                     .cipherSpec(cipherSpec)// 指定加密方式，使用默认加密可以省略
                     .writeAheadLoggingEnabled(true)// 打开WAL以及读写并发，可以省略让Room决定是否要打开
                     .asyncCheckpointEnabled(true)// 打开异步Checkpoint优化，不需要可以省略
-                Room.databaseBuilder(
+                val builder = Room.databaseBuilder(
                     applicationContext,
                     LogDatabase::class.java,
                     getDatabasePath(applicationContext)
                 )
-                    .openHelperFactory(factory)
+                builder.openHelperFactory(factory)
                     .addMigrations(mMigration1_2, mMigration2_3, mMigration3_4)
                     .build()
                     .also {
                         instance = it
+                        /*
+                        删除本地化时效外的数据
+                         */
+                        DefaultExecutorSupplier.instance.forBackgroundTasks().execute {
+                            val time = VLog.logStorageLifeInDay() * 24 * 60 * 60 * 1000L
+                            val current = System.currentTimeMillis()
+                            it.logDao().deleteOverLifeData(current - time)
+                            it.httpLogDao().deleteOverLifeData(current - time)
+                        }
+                    }
+            }
+        }
+
+        @JvmStatic
+        fun getExternalInstance(
+            context: Context,
+            packageName: String,
+            filePath: String
+        ): LogDatabase = externalInstance ?: synchronized(this) {
+            externalInstance ?: let {
+                // 指定加密方式，使用默认加密可以省略
+                val cipherSpec: SQLiteCipherSpec = SQLiteCipherSpec()
+                    .setPageSize(4096)
+                    .setKDFIteration(64000)
+                val password = LogEncryptJNI.readEncrypt(
+                    VLog.encryptedKey() ?: packageName
+                )
+                val factory = WCDBOpenHelperFactory()
+                    .passphrase(password.toByteArray())// 指定加密DB密钥，非加密DB去掉此行
+                    .cipherSpec(cipherSpec)// 指定加密方式，使用默认加密可以省略
+                    .writeAheadLoggingEnabled(true)// 打开WAL以及读写并发，可以省略让Room决定是否要打开
+                    .asyncCheckpointEnabled(true)// 打开异步Checkpoint优化，不需要可以省略
+                val builder = Room.databaseBuilder(
+                    context.applicationContext,
+                    LogDatabase::class.java,
+                    filePath
+                )
+                builder.openHelperFactory(factory)
+                    .addMigrations(mMigration1_2, mMigration2_3, mMigration3_4)
+                    .build()
+                    .also {
+                        externalInstance = it
                         /*
                         删除本地化时效外的数据
                          */
