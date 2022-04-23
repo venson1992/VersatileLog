@@ -2,8 +2,8 @@ buildscript {
     ext {
         kotlinVersion = '1.5.31'
         // Current lint target: 7.0.2+23
-        gradlePluginVersion = '7.2.0-rc01'
-        lintVersion = '30.2.0-rc01'
+        gradlePluginVersion = '7.0.2'
+        lintVersion = '30.0.2'
     }
     repositories {
         maven { url 'https://maven.aliyun.com/repository/google' }
