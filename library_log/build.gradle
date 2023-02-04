@@ -14,12 +14,12 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
         ndk {
-            abiFilters /*"armeabi", */"armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
+            abiFilters /*"armeabi", */ "armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
         }
         externalNativeBuild {
             cmake {
                 cppFlags "-fexceptions -frtti -std=c++11 -fpermissive"
-                abiFilters /*"armeabi", */"armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
+                abiFilters /*"armeabi", */ "armeabi-v7a", 'arm64-v8a', 'x86', 'x86_64'
             }
         }
         javaCompileOptions {
@@ -40,7 +40,7 @@ android {
     externalNativeBuild {
         cmake {
             path file('CMakeLists.txt')
-            version '3.10.2'
+            version '3.22.1'
         }
     }
     sourceSets {
