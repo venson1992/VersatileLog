@@ -33,6 +33,8 @@ object VLog {
     //providerAction
     const val ACTION_PROVIDER = "com.venson.versatile.log.PROVIDER"
 
+    private var mExceptionCallback: ((e: Exception) -> Unit)? = null
+
     //是否打印日志
     private var isPrintLog: Boolean = BuildConfig.DEBUG
 
@@ -381,5 +383,18 @@ object VLog {
         fun onSuccess(zipFile: File)
 
         fun onFailure(throwable: Throwable)
+    }
+
+    fun setExceptionCallback(callback: (e: Exception) -> Unit) {
+        mExceptionCallback = callback
+    }
+
+    fun callException(e1: Exception) {
+        try {
+            mExceptionCallback?.invoke(e1)
+        } catch (e2: Exception) {
+            e1.printStackTrace()
+            e2.printStackTrace()
+        }
     }
 }

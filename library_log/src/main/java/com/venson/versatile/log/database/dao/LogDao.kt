@@ -17,27 +17,31 @@ abstract class LogDao {
      */
     fun insertLog(tag: String?, level: Int, head: String?, msg: String?) {
         DefaultExecutorSupplier.instance.forBackgroundTasks().execute {
-            innerInsertLog(
-                LogEntity(
-                    null,
-                    System.currentTimeMillis(),
-                    tag,
-                    level.toString(),
-                    when (level) {
-                        VLog.JSON -> {
-                            "json"
-                        }
-                        VLog.XML -> {
-                            "xml"
-                        }
-                        else -> {
-                            ""
-                        }
-                    },
-                    head,
-                    msg
+            try {
+                innerInsertLog(
+                    LogEntity(
+                        null,
+                        System.currentTimeMillis(),
+                        tag,
+                        level.toString(),
+                        when (level) {
+                            VLog.JSON -> {
+                                "json"
+                            }
+                            VLog.XML -> {
+                                "xml"
+                            }
+                            else -> {
+                                ""
+                            }
+                        },
+                        head,
+                        msg
+                    )
                 )
-            )
+            } catch (e: Exception) {
+                VLog.callException(e)
+            }
         }
     }
 
